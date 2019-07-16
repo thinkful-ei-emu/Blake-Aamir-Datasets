@@ -2,7 +2,7 @@ require('dotenv').config;
 //console.log(process.env.API_TOKEN);
 const express = require('express');
 const morgan = require('morgan');
-const movies = require('./movies');
+const movies = require('./movies.json');
 const cors = require('cors');
 const helmet = require('helmet');
 
@@ -22,6 +22,43 @@ app.use(function validateBearerToken(req, res, next){
   next();
 });
 
+
+
+app.get('/movie' ,(req , res) => {
+
+  const {searchType, search} = req.query;
+  if(!searchType || !search){
+    let returnString = (!searchType? ' no searchtype, ': '') + (!search? ' no search': '');
+    return res.status(404).send(returnString);
+  }
+  if(!(searchType === 'genre' || searchType === 'country' ||searchType === 'avg_vote' )){
+    return res.status(404).send('invalid seachType');
+  }
+  if(searchType === 'genre' ){
+    console.log('it ran');
+    const myArray = movies.filter(movie => {
+      return (movie.genre.includes(search));
+    });
+    return res.json(myArray);
+  }
+  if(searchType === 'country' ){
+    let newArray = movies;
+    const myArray = newArray.filter(movie => {
+      return (movie.country.includes(search));
+    });
+    return res.json(myArray);
+  }
+  if(searchType === 'avg_vote' ){
+    const voteNum = parseFloat(search);
+    const myArray = movies.filter(movie => {
+      return (movie.avg_vote >= voteNum);
+    });
+    return res.json(myArray);
+  }
+
+
+
+});
 
 
 const PORT = 8080; 
